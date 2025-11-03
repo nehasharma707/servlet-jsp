@@ -1,0 +1,65 @@
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import java.sql.*;
+
+public class AttendanceServlet extends HttpServlet {
+
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
+        // Display Attendance Form
+        out.println("<html><body>");
+        out.println("<h2>Student Attendance Portal</h2>");
+        out.println("<form method='post' action='AttendanceServlet'>");
+        out.println("Student ID: <input type='text' name='sid' required><br><br>");
+        out.println("Date: <input type='date' name='date' required><br><br>");
+        out.println("Status: <select name='status' required>");
+        out.println("<option value='Present'>Present</option>");
+        out.println("<option value='Absent'>Absent</option>");
+        out.println("</select><br><br>");
+        out.println("<input type='submit' value='Submit Attendance'>");
+        out.println("</form>");
+        out.println("</body></html>");
+
+        out.close();
+    }
+
+    public void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
+        // Get values from form
+        String sid = request.getParameter("sid");
+        String date = request.getParameter("date");
+        String status = request.getParameter("status");
+
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection con = DriverManager.getConnection(
+                "jdbc:mysql://localhost:3306/your_database", "root", "your_password");
+
+            PreparedStatement ps = con.prepareStatement(
+                "INSERT INTO Attendance (StudentID, AttendanceDate, Status) VALUES (?, ?, ?)");
+
+            ps.setString(1, sid);
+            ps.setString(2, date);
+            ps.setString(3, status);
+
+            ps.executeUpdate();
+
+            out.println("<h3>Attendance Submitted Successfully!</h3>");
+            out.println("<a href='AttendanceServlet'>Submit Another</a>");
+        }
+        catch (Exception e) {
+            out.println("<h3>Error: " + e.getMessage() + "</h3>");
+        }
+
+        out.close();
+    }
+}
